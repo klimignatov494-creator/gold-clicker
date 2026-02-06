@@ -3,96 +3,276 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GOLD FARM</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<title>GoldFarm — игровой кликер</title>
 <style>
-body {
-    margin:0;
-    font-family: 'Segoe UI', sans-serif;
-    background: #111;
-    color: gold;
-    display: flex;
-    justify-content: center;
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: #e5e7eb;
+    overflow-x: hidden;
+  }
+
+  header {
+    padding: 50px 20px;
+    text-align: center;
+    background: linear-gradient(135deg, #1e293b, #020617);
+  }
+
+  header h1 {
+    font-size: 42px;
+    margin-bottom: 10px;
+    color: #facc15;
+    animation: glow 3s ease-in-out infinite;
+  }
+
+  header p { font-size: 18px; opacity: 0.9; }
+
+  .container { max-width: 1000px; margin: auto; padding: 40px 20px; }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    background: #020617;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.4);
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeUp 0.8s ease forwards;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .card:nth-child(1) { animation-delay: 0.1s; }
+  .card:nth-child(2) { animation-delay: 0.2s; }
+  .card:nth-child(3) { animation-delay: 0.3s; }
+  .card:nth-child(4) { animation-delay: 0.4s; }
+
+  .card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(250, 204, 21, 0.18);
+  }
+
+  .card h3 { color: #facc15; margin-bottom: 10px; }
+  .card p { font-size: 15px; opacity: 0.85; }
+
+  .cta { text-align: center; margin-top: 60px; }
+  .cta button {
+    background: #facc15;
+    color: #020617;
+    border: none;
+    padding: 16px 34px;
+    font-size: 18px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.25s ease;
+    box-shadow: 0 0 0 rgba(250, 204, 21, 0.6);
+  }
+  .cta button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(250, 204, 21, 0.6);
+  }
+
+  footer { text-align: center; padding: 25px; opacity: 0.6; font-size: 14px; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes glow {
+    0%, 100% { text-shadow: 0 0 10px rgba(250, 204, 21, 0.4); }
+    50% { text-shadow: 0 0 25px rgba(250, 204, 21, 0.8); }
+  }
+
+  /* ===== МОДАЛЬНОЕ ОКНО ===== */
+  .modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.85);
+    z-index: 1000;
     align-items: center;
-    height: 100vh;
-}
-#page1, #page2, #registerModal { display: none; text-align:center; }
-h1 { font-size:48px; color:gold; text-shadow:0 0 10px #FFD700; }
-button { padding:12px 24px; font-size:18px; margin:12px; cursor:pointer; border-radius:12px; border:none; }
-button.gold { background: linear-gradient(45deg,#FFD700,#FFA500); color:#111; }
-input, select { padding:10px; margin:8px 0; border-radius:8px; border:none; width:80%; font-size:16px; }
-label { display:block; margin-top:10px; font-size:16px; color:#FFD700; }
-#message { color:red; margin-top:10px; }
+    justify-content: center;
+  }
+
+  .modal.active { display: flex; }
+
+  .modal-content {
+    background: #020617;
+    width: 100%;
+    max-width: 420px;
+    padding: 30px 25px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    animation: fadeUp 0.5s ease forwards;
+  }
+
+  .modal-content h2 { color: #facc15; margin-bottom: 20px; }
+  .modal-content input, .modal-content select {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 12px;
+    border: none;
+    font-size: 15px;
+  }
+
+  .cta-btn {
+    background: #facc15;
+    color: #020617;
+    border: none;
+    padding: 16px;
+    font-size: 18px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+    margin-top: 15px;
+    transition: all 0.25s ease;
+    box-shadow: 0 0 0 rgba(250, 204, 21, 0.6);
+  }
+
+  .cta-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(250, 204, 21, 0.6);
+  }
+
+  /* ===== МЕНЮ ПОСЛЕ РЕГИСТРАЦИИ ===== */
+  #menuScreen { display: none; text-align: center; padding: 40px 20px; }
+  #menuScreen h2 { color: #facc15; font-size: 32px; margin-bottom: 20px; }
+  .menu-btn { 
+    background: #facc15;
+    color: #020617;
+    padding: 14px 28px;
+    margin: 10px;
+    font-size: 18px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: bold;
+    border: none;
+    transition: all 0.25s ease;
+  }
+  .menu-btn:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(250, 204, 21, 0.6);}
 </style>
 </head>
 <body>
 
-<div id="page1">
-    <h1>GOLD FARM</h1>
-    <p>Добро пожаловать в кликер голды!</p>
-    <button class="gold" onclick="showRegister()">Войти</button>
-</div>
+<header>
+  <h1>GoldFarm</h1>
+  <p>Добро пожаловать в кликер голды!</p>
+</header>
 
-<div id="registerModal">
+<section class="container" id="mainScreen">
+  <div class="cards">
+    <div class="card">
+      <h3>🤖 Безопасность данных</h3>
+      <p>Ваши данные никуда не утекут 🛡️</p>
+    </div>
+    <div class="card">
+      <h3>💰 Лёгкая добыча голды</h3>
+      <p>Просто кликай и получай голду 🤑</p>
+    </div>
+    <div class="card">
+      <h3>🚀 Быстрые выводы</h3>
+      <p>От 1 минуты до 1 часа</p>
+    </div>
+    <div class="card">
+      <h3>💻 Техподдержка</h3>
+      <p>Реагируем практически моментально ✅</p>
+    </div>
+  </div>
+
+  <div class="cta">
+    <button id="openModal">Войти ✈️</button>
+  </div>
+</section>
+
+<!-- МОДАЛЬНОЕ ОКНО -->
+<div class="modal" id="modal">
+  <div class="modal-content">
     <h2>Регистрация</h2>
-    <input id="nickname" placeholder="Как вас звать (не пишите реальное имя)">
-    <label for="gender">Укажите пол:</label>
+    <input type="text" id="username" placeholder="Введите ник (только англ.)">
     <select id="gender">
-        <option value="male">Мужской</option>
-        <option value="female">Женский</option>
+      <option value="">Выберите пол</option>
+      <option value="male">Мужской</option>
+      <option value="female">Женский</option>
     </select>
-    <div id="message"></div>
-    <button class="gold" onclick="submitRegistration()">Далее</button>
+    <input type="date" id="birth">
+    <button id="nextBtn" class="cta-btn">Далее ➜</button>
+  </div>
 </div>
 
-<div id="page2">
-    <h1>Добро пожаловать!</h1>
-    <p id="userInfo"></p>
-    <p>Здесь будет ваш кликер голды.</p>
-    <button class="gold" onclick="clickGold()">💰 Клик! +250</button>
-    <p>Баланс: <span id="gold">0</span></p>
-    <button class="gold" onclick="sendToBot()">📤 Отправить боту</button>
-</div>
+<!-- МЕНЮ ПОСЛЕ РЕГИСТРАЦИИ -->
+<section id="menuScreen">
+  <h2>Главное меню</h2>
+  <button class="menu-btn" onclick="alert('Открыть профиль')">👤 Профиль</button>
+  <button class="menu-btn" onclick="alert('Начать кликер')">💰 Кликать голду</button>
+  <button class="menu-btn" onclick="alert('Вывод голды')">💸 Вывод голды</button>
+  <button class="menu-btn" onclick="alert('Информация о боте')">ℹ️ Информация</button>
+</section>
+
+<footer>
+  © 2026 GoldFarm. Только для игровых проектов.
+</footer>
 
 <script>
-const tg = window.Telegram.WebApp;
-tg.expand();
-document.getElementById("page1").style.display = "block";
+document.addEventListener('DOMContentLoaded', function() {
+  const modal = document.getElementById('modal');
+  const openBtn = document.getElementById('openModal');
+  const nextBtn = document.getElementById('nextBtn');
+  const mainScreen = document.getElementById('mainScreen');
+  const menuScreen = document.getElementById('menuScreen');
 
-let gold = 0;
-let existingNicknames = [];
+  // Список занятых никнеймов
+  const takenUsernames = [];
 
-function showRegister(){
-    document.getElementById("page1").style.display="none";
-    document.getElementById("registerModal").style.display="block";
-}
+  openBtn.onclick = () => modal.classList.add('active');
 
-function isEnglish(str){ return /^[A-Za-z0-9_]+$/.test(str); }
+  window.onclick = (e) => {
+    if (e.target === modal) modal.classList.remove('active');
+  };
 
-function submitRegistration(){
-    const nickname = document.getElementById("nickname").value.trim();
-    const gender = document.getElementById("gender").value;
-    const messageDiv = document.getElementById("message");
+  nextBtn.onclick = function(e) {
+    const username = document.getElementById('username').value.trim();
+    const gender = document.getElementById('gender').value;
+    const birth = document.getElementById('birth').value;
 
-    if(nickname.length < 3){ messageDiv.innerText="Ник слишком короткий"; return; }
-    if(!isEnglish(nickname)){ messageDiv.innerText="Ник должен быть на английском"; return; }
-    if(existingNicknames.includes(nickname)){ messageDiv.innerText="Такой ник уже существует"; return; }
+    // Проверка
+    if (!username || !gender || !birth) {
+      alert('Пожалуйста, заполните все поля!');
+      return;
+    }
 
-    existingNicknames.push(nickname);
+    // Проверка английских букв
+    const engRegex = /^[A-Za-z0-9_]+$/;
+    if (!engRegex.test(username)) {
+      alert('Ник должен содержать только английские буквы, цифры и _');
+      return;
+    }
 
-    document.getElementById("registerModal").style.display="none";
-    document.getElementById("page2").style.display="block";
-    document.getElementById("userInfo").innerText=`Ник: ${nickname}, Пол: ${gender}`;
-}
+    // Проверка уникальности
+    if (takenUsernames.includes(username.toLowerCase())) {
+      alert('Никнейм уже занят!');
+      return;
+    }
 
-function clickGold(){ gold += 250; document.getElementById("gold").innerText = gold; }
+    // Сохраняем ник
+    takenUsernames.push(username.toLowerCase());
 
-function sendToBot(){
-    const nickname = document.getElementById("nickname").value.trim();
-    const gender = document.getElementById("gender").value;
-    tg.sendData(JSON.stringify({ nickname: nickname, gender: gender, gold: gold }));
-}
+    // Закрываем модальное окно и показываем меню
+    modal.classList.remove('active');
+    mainScreen.style.display = 'none';
+    menuScreen.style.display = 'block';
+  };
+});
 </script>
+
 </body>
 </html>
-
