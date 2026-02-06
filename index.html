@@ -2,66 +2,97 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Gold Clicker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GOLD FARM</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-  body {
-    margin: 0;
-    background: #0f172a;
-    color: white;
-    font-family: Arial;
+body {
+    margin:0;
+    font-family: 'Segoe UI', sans-serif;
+    background: #111;
+    color: gold;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-  }
-  .card {
-    width: 320px;
-    background: #111827;
-    border-radius: 16px;
-    padding: 16px;
-    text-align: center;
-  }
-  .gold {
-    font-size: 32px;
-    color: gold;
-  }
-  button {
-    width: 100%;
-    height: 48px;
-    margin-top: 12px;
-    border-radius: 12px;
-    border: none;
-    font-size: 16px;
-    font-weight: bold;
-    background: gold;
-    color: black;
-  }
+}
+#page1, #page2, #registerModal { display: none; text-align:center; }
+h1 { font-size:48px; color:gold; text-shadow:0 0 10px #FFD700; }
+button { padding:12px 24px; font-size:18px; margin:12px; cursor:pointer; border-radius:12px; border:none; }
+button.gold { background: linear-gradient(45deg,#FFD700,#FFA500); color:#111; }
+input, select { padding:10px; margin:8px 0; border-radius:8px; border:none; width:80%; font-size:16px; }
+label { display:block; margin-top:10px; font-size:16px; color:#FFD700; }
+#message { color:red; margin-top:10px; }
 </style>
 </head>
 <body>
 
-<div class="card">
-  <h2>Gold Clicker</h2>
-  <div class="gold" id="gold">0</div>
-  <button onclick="clickGold()">Добыть золото</button>
+<div id="page1">
+    <h1>GOLD FARM</h1>
+    <p>Добро пожаловать в кликер голды!</p>
+    <button class="gold" onclick="showRegister()">Войти</button>
+</div>
+
+<div id="registerModal">
+    <h2>Регистрация</h2>
+    <input id="nickname" placeholder="Как вас звать (не пишите реальное имя)">
+    <label for="gender">Укажите пол:</label>
+    <select id="gender">
+        <option value="male">Мужской</option>
+        <option value="female">Женский</option>
+    </select>
+    <div id="message"></div>
+    <button class="gold" onclick="submitRegistration()">Далее</button>
+</div>
+
+<div id="page2">
+    <h1>Добро пожаловать!</h1>
+    <p id="userInfo"></p>
+    <p>Здесь будет ваш кликер голды.</p>
+    <button class="gold" onclick="clickGold()">💰 Клик! +250</button>
+    <p>Баланс: <span id="gold">0</span></p>
+    <button class="gold" onclick="sendToBot()">📤 Отправить боту</button>
 </div>
 
 <script>
-  const tg = window.Telegram.WebApp;
-  let gold = 0;
+const tg = window.Telegram.WebApp;
+tg.expand();
+document.getElementById("page1").style.display = "block";
 
-  function clickGold() {
-    gold++;
-    document.getElementById("gold").textContent = gold;
+let gold = 0;
+let existingNicknames = [];
 
-    tg.sendData(JSON.stringify({
-      gold: gold
-    }));
-  }
+function showRegister(){
+    document.getElementById("page1").style.display="none";
+    document.getElementById("registerModal").style.display="block";
+}
 
-  tg.ready();
+function isEnglish(str){ return /^[A-Za-z0-9_]+$/.test(str); }
+
+function submitRegistration(){
+    const nickname = document.getElementById("nickname").value.trim();
+    const gender = document.getElementById("gender").value;
+    const messageDiv = document.getElementById("message");
+
+    if(nickname.length < 3){ messageDiv.innerText="Ник слишком короткий"; return; }
+    if(!isEnglish(nickname)){ messageDiv.innerText="Ник должен быть на английском"; return; }
+    if(existingNicknames.includes(nickname)){ messageDiv.innerText="Такой ник уже существует"; return; }
+
+    existingNicknames.push(nickname);
+
+    document.getElementById("registerModal").style.display="none";
+    document.getElementById("page2").style.display="block";
+    document.getElementById("userInfo").innerText=`Ник: ${nickname}, Пол: ${gender}`;
+}
+
+function clickGold(){ gold += 250; document.getElementById("gold").innerText = gold; }
+
+function sendToBot(){
+    const nickname = document.getElementById("nickname").value.trim();
+    const gender = document.getElementById("gender").value;
+    tg.sendData(JSON.stringify({ nickname: nickname, gender: gender, gold: gold }));
+}
 </script>
-
 </body>
 </html>
+
