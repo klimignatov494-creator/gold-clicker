@@ -3,202 +3,166 @@
 <head>
 <meta charset="UTF-8">
 <title>GoldFarm</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: #0f172a;
-  color: #e5e7eb;
-  margin: 0;
-  text-align: center;
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0f172a;
+  color:#e5e7eb;
+  text-align:center;
 }
-h1 { color: #facc15; margin: 40px 0 20px; }
-
-/* Кнопки одинаковой длины */
-button {
-  padding: 15px 40px;
-  background: #facc15;
-  color: #020617;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  margin: 10px 0;
-  width: 250px;
-  font-weight: bold;
-  font-size: 16px;
-  transition: all 0.25s;
+h1{color:#facc15;text-shadow:0 0 20px #facc15;}
+button{
+  width:260px;
+  padding:15px;
+  margin:8px 0;
+  background:#facc15;
+  color:#020617;
+  border:none;
+  border-radius:14px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
 }
-button:hover { transform: scale(1.05); }
-
-/* Модальные окна */
-.modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(2,6,23,.85);
-  justify-content: center;
-  align-items: center;
-  z-index: 100;
+input,select{
+  width:260px;
+  padding:12px;
+  margin:6px 0;
+  border-radius:12px;
+  border:none;
 }
-.modal.active { display: flex; }
-.modal-content {
-  background: #020617;
-  padding: 30px;
-  border-radius: 20px;
-  text-align: center;
-  width: 90%;
-  max-width: 400px;
-}
-input, select {
-  width: 90%;
-  padding: 12px;
-  margin: 8px 0;
-  border-radius: 12px;
-  border: none;
-  font-size: 14px;
-}
+.hidden{display:none;}
+.block{margin-top:40px;}
 </style>
 </head>
+
 <body>
 
-<!-- Окно регистрации -->
-<div id="registerWindow" class="modal active">
-  <div class="modal-content">
-    <h2>Регистрация</h2>
-    <input type="text" id="username" placeholder="Ник (только английские символы)">
-    <select id="gender">
-      <option value="">Выберите пол</option>
-      <option value="male">Мужской</option>
-      <option value="female">Женский</option>
-    </select>
-    <input type="date" id="birth" />
-    <button onclick="register()">Войти</button>
-  </div>
-</div>
-
-<!-- Главное меню -->
-<div id="menu" style="display:none;">
+<!-- РЕГИСТРАЦИЯ -->
+<div id="register" class="block">
   <h1>GoldFarm</h1>
-  <button onclick="openWindow('profile')">Профиль</button>
-  <button onclick="openWindow('clicker')">Кликать голду</button>
-  <button onclick="openWindow('withdraw')">Вывод голды</button>
-  <button onclick="openWindow('info')">Информация</button>
-  <button onclick="window.open('https://t.me/tehPODDERZKActazyBOY','_blank')">Тех поддержка</button>
+  <p>Добро пожаловать в кликер голды!</p>
+
+  <input id="username" placeholder="Как вас звать? (EN)" />
+  <select id="gender">
+    <option value="">Укажите пол</option>
+    <option value="male">Мужской</option>
+    <option value="female">Женский</option>
+  </select>
+
+  <button onclick="register()">Далее ➜</button>
 </div>
 
-<!-- Профиль -->
-<div class="modal" id="profileWindow">
-  <div class="modal-content">
-    <h2>Профиль</h2>
-    <p id="profileText"></p>
-    <button onclick="backMenu()">Назад в меню</button>
-  </div>
+<!-- МЕНЮ -->
+<div id="menu" class="block hidden">
+  <h1>Меню</h1>
+
+  <button onclick="openProfile()">👤 Профиль</button>
+  <button onclick="openClicker()">💰 Кликать голду</button>
+  <button onclick="openInfo()">ℹ️ Информация</button>
 </div>
 
-<!-- Кликер -->
-<div class="modal" id="clickerWindow">
-  <div class="modal-content">
-    <h2>Кликер голды</h2>
-    <button onclick="users.balance+=250; updateProfile(); alert('Вы получили 250 голды!');">💰 Клик! +250 голды</button>
-    <button onclick="backMenu()">Назад в меню</button>
-  </div>
+<!-- ПРОФИЛЬ -->
+<div id="profile" class="block hidden">
+  <h1>Профиль</h1>
+  <p id="profileText"></p>
+  <button onclick="backMenu()">⬅️ Назад в меню</button>
 </div>
 
-<!-- Вывод -->
-<div class="modal" id="withdrawWindow">
-  <div class="modal-content">
-    <h2>Вывод голды</h2>
-    <input type="number" id="withdrawAmount" placeholder="Минимум 5000">
-    <button onclick="withdraw()">Далее ➜</button>
-  </div>
+<!-- КЛИКЕР -->
+<div id="clicker" class="block hidden">
+  <h1>Кликер</h1>
+  <p id="goldText">Голда: 0</p>
+  <button onclick="clickGold()">💰 Клик +250</button>
+  <button onclick="backMenu()">⬅️ Назад в меню</button>
 </div>
 
-<!-- Информация -->
-<div class="modal" id="infoWindow">
-  <div class="modal-content">
-    <h2>Информация</h2>
-    <p>Разработчик: BotMaster</p>
-    <p>Версия бота: 1.1</p>
-    <button onclick="backMenu()">Назад в меню</button>
-  </div>
+<!-- ИНФО -->
+<div id="info" class="block hidden">
+  <h1>Информация</h1>
+  <p>Разработчик: GoldFarm Team</p>
+  <p>Версия: 1.0</p>
+  <button onclick="backMenu()">⬅️ Назад в меню</button>
 </div>
 
 <script>
-let users = {
-  balance: 10000,
-  total_withdrawn: 0,
+const tg = window.Telegram.WebApp;
+tg.expand();
+
+let user = {
   username: "",
-  tg_user: "",
-  pending: 0
+  gender: "",
+  gold: 0,
+  tg_username: tg.initDataUnsafe.user?.username || "unknown"
 };
 
-// Регистрация
-function register() {
-  const username = document.getElementById('username').value.trim();
-  const gender = document.getElementById('gender').value;
-  const birth = document.getElementById('birth').value;
+function register(){
+  const name = document.getElementById("username").value.trim();
+  const gender = document.getElementById("gender").value;
 
-  if(!username || !gender || !birth) {
-    alert("Заполните все поля!");
+  if(!/^[a-zA-Z]+$/.test(name)){
+    alert("Ник только на английском!");
+    return;
+  }
+  if(!gender){
+    alert("Укажите пол");
     return;
   }
 
-  // Проверка английских символов
-  if(!/^[a-zA-Z0-9_]+$/.test(username)) {
-    alert("Ник должен быть на английском!");
-    return;
-  }
+  user.username = name;
+  user.gender = gender;
 
-  users.username = username;
-  users.tg_user = username; // Пока просто дублируем для примера
-  document.getElementById('registerWindow').classList.remove('active');
-  document.getElementById('menu').style.display = 'block';
+  tg.sendData(JSON.stringify({
+    action:"save_profile",
+    username:user.username,
+    gender:user.gender,
+    gold:user.gold
+  }));
+
+  document.getElementById("register").classList.add("hidden");
+  document.getElementById("menu").classList.remove("hidden");
 }
 
-// Открытие окна
-function openWindow(id){
-  document.getElementById('menu').style.display='none';
-  document.getElementById(id+'Window').classList.add('active');
-
-  if(id==='profile'){
-    updateProfile();
-  }
+function openProfile(){
+  hideAll();
+  document.getElementById("profile").classList.remove("hidden");
+  document.getElementById("profileText").innerText =
+    `Ник: ${user.username}\nПол: ${user.gender}\nГолда: ${user.gold}\nTG: @${user.tg_username}`;
 }
 
-// Обновление текста профиля
-function updateProfile(){
-  document.getElementById('profileText').innerText=
-    `Ваш баланс: ${users.balance}\n` +
-    `Выведено всего: ${users.total_withdrawn}\n` +
-    `Ник: ${users.username}\n` +
-    `TG: @${users.tg_user}`;
+function openClicker(){
+  hideAll();
+  document.getElementById("clicker").classList.remove("hidden");
+  updateGold();
 }
 
-// Назад в меню
+function clickGold(){
+  user.gold += 250;
+  updateGold();
+}
+
+function updateGold(){
+  document.getElementById("goldText").innerText = "Голда: " + user.gold;
+}
+
+function openInfo(){
+  hideAll();
+  document.getElementById("info").classList.remove("hidden");
+}
+
 function backMenu(){
-  document.getElementById('menu').style.display='block';
-  document.querySelectorAll('.modal').forEach(m=>m.classList.remove('active'));
+  hideAll();
+  document.getElementById("menu").classList.remove("hidden");
 }
 
-// Вывод голды
-function withdraw(){
-  let amt=parseInt(document.getElementById('withdrawAmount').value);
-  if(isNaN(amt) || amt<5000){
-    alert('Сумма меньше 5000 или некорректная! Введите заново.');
-    return;
-  }
-  if(amt>users.balance){
-    alert('Недостаточно голды для вывода!');
-    return;
-  }
-
-  users.pending=amt;
-  users.balance-=amt;
-
-  alert(`Ваш вывод на модерации: ${amt} голды`);
-  backMenu();
-
-  // TODO: здесь можно отправить данные на бот через WebAppData/WebSocket
-  console.log(`Отправка на модерацию: ${users.tg_user}, сумма: ${amt}`);
+function hideAll(){
+  ["menu","profile","clicker","info"].forEach(id=>{
+    document.getElementById(id).classList.add("hidden");
+  });
 }
 </script>
 
