@@ -4,167 +4,167 @@
 <meta charset="UTF-8">
 <title>GoldFarm</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
 body{
   margin:0;
-  font-family:Arial;
-  background:#0f172a;
-  color:#e5e7eb;
-  text-align:center;
+  font-family:Arial, sans-serif;
+  background:linear-gradient(180deg,#020617,#020617,#020617);
+  color:#fff;
 }
-h1{color:#facc15;text-shadow:0 0 20px #facc15;}
-button{
-  width:260px;
-  padding:15px;
-  margin:8px 0;
-  background:#facc15;
-  color:#020617;
-  border:none;
-  border-radius:14px;
-  font-size:16px;
+
+.hidden{display:none;}
+
+.container{padding:20px 16px 90px;}
+
+h1{
+  margin:10px 0 20px;
+  font-size:28px;
+}
+
+.card{
+  background:#020617cc;
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:16px;
+}
+
+.profile{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.avatar{
+  width:64px;
+  height:64px;
+  border-radius:50%;
+  background:#111;
+}
+
+.balance{
+  font-size:22px;
   font-weight:bold;
-  cursor:pointer;
 }
-input,select{
-  width:260px;
+
+input{
+  width:100%;
   padding:12px;
-  margin:6px 0;
   border-radius:12px;
   border:none;
+  background:#020617;
+  color:#fff;
+  margin-top:10px;
 }
-.hidden{display:none;}
-.block{margin-top:40px;}
+
+button{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:none;
+  background:#2563eb;
+  color:#fff;
+  font-weight:bold;
+  margin-top:10px;
+}
+
+/* Bottom menu */
+.nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#020617;
+  display:flex;
+  justify-content:space-around;
+  padding:10px 0;
+  border-top:1px solid #111;
+}
+
+.nav button{
+  background:none;
+  border:none;
+  color:#9ca3af;
+  font-size:12px;
+}
+
+.nav .active{
+  color:#3b82f6;
+}
 </style>
 </head>
 
 <body>
 
-<!-- РЕГИСТРАЦИЯ -->
-<div id="register" class="block">
-  <h1>GoldFarm</h1>
-  <p>Добро пожаловать в кликер голды!</p>
-
-  <input id="username" placeholder="Как вас звать? (EN)" />
-  <select id="gender">
-    <option value="">Укажите пол</option>
-    <option value="male">Мужской</option>
-    <option value="female">Женский</option>
-  </select>
-
-  <button onclick="register()">Далее ➜</button>
-</div>
-
-<!-- МЕНЮ -->
-<div id="menu" class="block hidden">
-  <h1>Меню</h1>
-
-  <button onclick="openProfile()">👤 Профиль</button>
-  <button onclick="openClicker()">💰 Кликать голду</button>
-  <button onclick="openInfo()">ℹ️ Информация</button>
-</div>
-
-<!-- ПРОФИЛЬ -->
-<div id="profile" class="block hidden">
+<div id="profile" class="container">
   <h1>Профиль</h1>
-  <p id="profileText"></p>
-  <button onclick="backMenu()">⬅️ Назад в меню</button>
+
+  <div class="card profile">
+    <img id="avatar" class="avatar">
+    <div>
+      <div id="name"></div>
+      <div class="balance">Баланс: <span id="balance">0</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <b>Промокод</b>
+    <input id="promo" placeholder="Введите промокод">
+    <button onclick="activatePromo()">Активировать</button>
+  </div>
+
+  <div class="card">
+    <b>Инвентарь</b>
+    <p id="inventory">Инвентарь пуст</p>
+  </div>
+
+  <div class="card">
+    <b>Топ лидеров</b>
+    <button>Подробнее</button>
+  </div>
+
+  <div class="card">
+    <b>Реферальная программа</b>
+    <p>Получай голду за друзей</p>
+  </div>
 </div>
 
-<!-- КЛИКЕР -->
-<div id="clicker" class="block hidden">
-  <h1>Кликер</h1>
-  <p id="goldText">Голда: 0</p>
-  <button onclick="clickGold()">💰 Клик +250</button>
-  <button onclick="backMenu()">⬅️ Назад в меню</button>
-</div>
-
-<!-- ИНФО -->
-<div id="info" class="block hidden">
-  <h1>Информация</h1>
-  <p>Разработчик: GoldFarm Team</p>
-  <p>Версия: 1.0</p>
-  <button onclick="backMenu()">⬅️ Назад в меню</button>
+<!-- Bottom nav -->
+<div class="nav">
+  <button>🏠<br>Главная</button>
+  <button>🏆<br>Режимы</button>
+  <button>🎁<br>Кейсы</button>
+  <button>⭐<br>Конкурс</button>
+  <button class="active">👤<br>Профиль</button>
 </div>
 
 <script>
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-let user = {
-  username: "",
-  gender: "",
-  gold: 0,
-  tg_username: tg.initDataUnsafe.user?.username || "unknown"
-};
+let balance = 99;
 
-function register(){
-  const name = document.getElementById("username").value.trim();
-  const gender = document.getElementById("gender").value;
+document.getElementById("balance").innerText = balance;
+document.getElementById("name").innerText =
+  tg.initDataUnsafe.user?.first_name || "User";
 
-  if(!/^[a-zA-Z]+$/.test(name)){
-    alert("Ник только на английском!");
-    return;
+if(tg.initDataUnsafe.user?.photo_url){
+  document.getElementById("avatar").src = tg.initDataUnsafe.user.photo_url;
+}
+
+function activatePromo(){
+  const code = document.getElementById("promo").value.trim().toUpperCase();
+  if(code === "GOLD100"){
+    balance += 100;
+    document.getElementById("balance").innerText = balance;
+    alert("Промокод активирован!");
+  } else {
+    alert("Неверный промокод");
   }
-  if(!gender){
-    alert("Укажите пол");
-    return;
-  }
-
-  user.username = name;
-  user.gender = gender;
-
-  tg.sendData(JSON.stringify({
-    action:"save_profile",
-    username:user.username,
-    gender:user.gender,
-    gold:user.gold
-  }));
-
-  document.getElementById("register").classList.add("hidden");
-  document.getElementById("menu").classList.remove("hidden");
-}
-
-function openProfile(){
-  hideAll();
-  document.getElementById("profile").classList.remove("hidden");
-  document.getElementById("profileText").innerText =
-    `Ник: ${user.username}\nПол: ${user.gender}\nГолда: ${user.gold}\nTG: @${user.tg_username}`;
-}
-
-function openClicker(){
-  hideAll();
-  document.getElementById("clicker").classList.remove("hidden");
-  updateGold();
-}
-
-function clickGold(){
-  user.gold += 250;
-  updateGold();
-}
-
-function updateGold(){
-  document.getElementById("goldText").innerText = "Голда: " + user.gold;
-}
-
-function openInfo(){
-  hideAll();
-  document.getElementById("info").classList.remove("hidden");
-}
-
-function backMenu(){
-  hideAll();
-  document.getElementById("menu").classList.remove("hidden");
-}
-
-function hideAll(){
-  ["menu","profile","clicker","info"].forEach(id=>{
-    document.getElementById(id).classList.add("hidden");
-  });
 }
 </script>
 
 </body>
 </html>
+
